@@ -118,7 +118,9 @@ export function renderProjectInvoicePdf(invoice) {
   // Header
   // -------------------------------------------------------------------------
   drawFrame();
-  const title = `INVOICE-  ${(project.invoice_title || `DEVELOPMENT WORK ${project.name}`).toUpperCase()}`;
+  // Don't double the prefix when the project's title already starts with "INVOICE-".
+  const titleText = (project.invoice_title || `DEVELOPMENT WORK ${project.name}`).replace(/^\s*invoice\s*-?\s*/i, '');
+  const title = `INVOICE-  ${titleText.toUpperCase()}`;
   put(title, TITLE_CENTER - width(title, 'bold', 14) / 2, 49.0, { font: 'bold', size: 14 });
 
   const logo = invoice.images?.logo;
@@ -147,6 +149,10 @@ export function renderProjectInvoicePdf(invoice) {
   const dateText = `Date: ${issueDateLabel(invoice.issueDate)}`;
   put(numberText, INFO_RIGHT - width(numberText), 135.4);
   put(dateText, INFO_RIGHT - width(dateText), 147.0);
+  if (invoice.dueDate) {
+    const dueText = `Due Date: ${issueDateLabel(invoice.dueDate)}`;
+    put(dueText, INFO_RIGHT - width(dueText, 'bold'), 158.6, { font: 'bold' });
+  }
 
   // "To" block: 26.7pt below the last company line, as on the reference.
   y = Math.max(y, 199.6 + LINE) + 15.06;
@@ -196,7 +202,7 @@ export function renderProjectInvoicePdf(invoice) {
     ['Account Type', bank.accountType],
     ['Currency', currency],
   ].filter(([, v]) => v);
-  const footerHeight = 29.5 + (bankRows.length + 1) * 11.65 + 27.3 + 38.2 + 25;
+  const footerHeight = 29.5 + bankRows.length * 11.65 + 27.3 + 38.2 + 25;
   if (top + footerHeight > FRAME.bottom - 10) {
     doc.addPage({ size: 'A4', margin: 0 });
     drawFrame();
@@ -208,10 +214,6 @@ export function renderProjectInvoicePdf(invoice) {
   for (const [label, value] of bankRows) {
     y += 11.65;
     put(`${label}: ${value}`, LEFT, y);
-  }
-  if (invoice.dueDate) {
-    y += 11.65;
-    putLine(wrap(`Invoice Due Date: ${issueDateLabel(invoice.dueDate)}`, 500, 'bold')[0], LEFT, y, 'bold');
   }
 
   const signature = invoice.images?.signature;
