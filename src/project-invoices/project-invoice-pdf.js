@@ -37,15 +37,10 @@ const lineAmount = (amount, currency) => {
   return `${value < 0 ? '-' : ''}${SYMBOLS[currency] ?? `${currency} `}${body}`;
 };
 
-function loadImage(file) {
-  if (!file) return null;
-  const resolved = path.resolve(process.cwd(), file);
-  return fs.existsSync(resolved) ? fs.readFileSync(resolved) : null;
-}
 
 /**
  * Client invoice in the layout of invoice S2534.
- * @param {object} invoice { invoiceNumber, issueDate, dueDate, currency, project, calc, company, bank }
+ * @param {object} invoice { invoiceNumber, issueDate, dueDate, currency, project, calc, company, bank, images: { logo, signature } }
  */
 export function renderProjectInvoicePdf(invoice) {
   const { calc, project, company, bank, currency } = invoice;
@@ -126,7 +121,7 @@ export function renderProjectInvoicePdf(invoice) {
   const title = `INVOICE-  ${(project.invoice_title || `DEVELOPMENT WORK ${project.name}`).toUpperCase()}`;
   put(title, TITLE_CENTER - width(title, 'bold', 14) / 2, 49.0, { font: 'bold', size: 14 });
 
-  const logo = loadImage(company.logoPath);
+  const logo = invoice.images?.logo;
   if (logo) doc.image(logo, 36.0, 67.3, { width: 48.7, height: 48.7 });
 
   put(company.name, LEFT, 135.4, { font: 'bold' });
@@ -219,7 +214,7 @@ export function renderProjectInvoicePdf(invoice) {
     putLine(wrap(`Invoice Due Date: ${issueDateLabel(invoice.dueDate)}`, 500, 'bold')[0], LEFT, y, 'bold');
   }
 
-  const signature = loadImage(company.signaturePath);
+  const signature = invoice.images?.signature;
   if (signature) doc.image(signature, 36.0, y + 27.3, { width: 97.5, height: 38.2 });
   const thanks = 'Thanks for your Business';
   put(thanks, PAGE_CENTER - width(thanks, 'bold') / 2, y + 79.9, { font: 'bold' });

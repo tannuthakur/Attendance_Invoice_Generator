@@ -178,7 +178,21 @@ All routes are under `/api/v1`.
 | `GET/POST /salaries` | Admin |
 | `POST /invoices`, `POST /invoices/preview`, `GET /invoices`, `GET /invoices/:id`, `GET /invoices/:id/pdf`, `POST /invoices/:id/void` | Admin |
 
-## Deploy
+## Deploy to Vercel
+
+The repo deploys as **one Vercel project**. The React app is served as static files from `web/dist`. The API runs as a serverless function (`api/index.js` → `dist/serverless.js`) under `/api/v1`. Both share one domain, so leave `VITE_API_URL` empty. `vercel.json` holds the build and install commands, the function settings and the rewrites.
+
+1. Import the GitHub repo in Vercel (Framework preset: **Other**), or run `npx vercel` from the project folder.
+2. Add the environment variables from `.env` under Project → Settings → Environment Variables, then change these:
+   - `TRUST_PROXY=1`
+   - `CORS_ORIGINS=https://<your-app>.vercel.app`
+   - `PASSWORD_RESET_REDIRECT_URL=https://<your-app>.vercel.app/reset-password`, and the same for `INVITE_REDIRECT_URL` with `/accept-invite`
+   - `COMPANY_SIGNATURE_PATH=storage:branding/signature.png`. The signature isn't in the repo; upload it to the private `invoices` bucket at `branding/signature.png`.
+3. In Supabase, open Authentication → URL Configuration. Set the Site URL to the Vercel URL and add `https://<your-app>.vercel.app/reset-password` to Redirect URLs.
+
+Rate limiting is kept in memory, per function instance.
+
+## Deploy with Docker
 
 ```bash
 docker build -t payroll-api .

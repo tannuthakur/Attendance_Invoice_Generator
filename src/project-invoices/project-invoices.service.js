@@ -5,6 +5,7 @@ import { unwrap, paginate, fetchAll, ilikeTerm } from '../common/utils/db';
 import { billingPeriod, daysBetween, formatDate, daysInMonth } from '../common/utils/dates';
 import { calculateProjectInvoice, ProjectInvoiceError } from './project-invoice-calculator';
 import { renderProjectInvoicePdf } from './project-invoice-pdf';
+import { loadAsset } from '../common/assets';
 
 const MAX_PERIOD_DAYS = 62;
 const LIST_COLUMNS =
@@ -59,6 +60,7 @@ export class ProjectInvoicesService {
 
     const pdf = await renderProjectInvoicePdf({
       invoiceNumber, issueDate, dueDate, currency, project, calc, company: this.config.company, bank: this.config.bank,
+      images: await this.images(this.config.company),
     });
     const pdfPath = `projects/${project.id}/${invoiceNumber.replace(/\//g, '-')}.pdf`;
     const upload = await this.storage
@@ -117,6 +119,16 @@ export class ProjectInvoicesService {
     return { data, page, limit, total: count };
   }
 
+  /** Logo and signature for the PDF, from disk or Supabase Storage (see loadAsset). */
+  async images(company) {
+    const { bucket } = this.config.invoices;
+    const [logo, signature] = await Promise.all([
+      loadAsset(company.logoPath, this.storage, bucket),
+      loadAsset(company.signaturePath, this.storage, bucket),
+    ]);
+    return { logo, signature };
+  }
+
   /** Highest S-number used so far + 1 (never below PROJECT_INVOICE_START_NUMBER). */
   async nextInvoiceNumber() {
     const rows = await fetchAll(() => this.db.from('project_invoices').select('invoice_number').ilike('invoice_number', 'S%').order('id'));
@@ -152,6 +164,7 @@ export class ProjectInvoicesService {
       calc: b,
       company: b.company || this.config.company,
       bank: b.bank || this.config.bank,
+      images: await this.images(this.config.company),
     });
     const { bucket } = this.config.invoices;
     const pdfPath = `projects/${invoice.project_id}/${number.replace(/\//g, '-')}.pdf`;
@@ -183,7 +196,7 @@ export class ProjectInvoicesService {
     const invoiceNumber = dto.invoiceNumber?.trim() || (await this.nextInvoiceNumber());
     const buffer = await renderProjectInvoicePdf({
       invoiceNumber, issueDate, dueDate, currency: project.currency.trim(), project, calc,
-      company: this.config.company, bank: this.config.bank,
+      company: this.config.company, bank: this.config.bank, images: await this.images(this.config.company),
     });
     return { buffer, fileName: `INVOICE ${invoiceNumber}.pdf` };
   }
