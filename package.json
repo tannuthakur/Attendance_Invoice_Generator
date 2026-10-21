@@ -1,0 +1,52 @@
+{
+  "name": "payroll-invoicing-api",
+  "version": "1.0.0",
+  "description": "Employee payroll & invoicing REST API (NestJS + Supabase, JavaScript)",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "rm -rf dist && babel src -d dist --copy-files",
+    "start": "node dist/main.js",
+    "start:dev": "nodemon --watch src --exec babel-node src/main.js",
+    "test": "jest",
+    "test:e2e": "jest --config test/jest-e2e.config.js --runInBand",
+    "db:push": "supabase db push",
+    "create-admin": "node scripts/create-admin.js",
+    "web:install": "npm --prefix web install",
+    "web:dev": "npm --prefix web run dev",
+    "web:build": "npm --prefix web run build"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.4.22",
+    "@nestjs/core": "^10.4.22",
+    "@nestjs/platform-express": "^10.4.22",
+    "@nestjs/throttler": "^5.2.0",
+    "@supabase/supabase-js": "^2.109.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1",
+    "decimal.js": "^10.6.0",
+    "dotenv": "^18.0.8",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "pdfkit": "^0.20.2",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "ws": "^8.22.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.29.7",
+    "@babel/core": "^7.29.7",
+    "@babel/node": "^7.29.7",
+    "@babel/plugin-proposal-decorators": "^7.29.7",
+    "@babel/plugin-transform-class-properties": "^7.29.7",
+    "@babel/preset-env": "^7.29.7",
+    "@nestjs/testing": "^10.4.22",
+    "babel-jest": "^30.5.2",
+    "jest": "^30.5.2",
+    "nodemon": "^3.1.14",
+    "supertest": "^7.3.1"
+  }
+}
