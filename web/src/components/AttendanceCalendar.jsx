@@ -3,8 +3,8 @@ import { api } from '../api';
 import { ErrorAlert, Loading, useAsync, useToast } from './ui';
 import { STATUS_LABELS, WEEKDAYS, billingPeriod, dayOfWeek, eachDay, formatMonth, shiftMonth } from '../format';
 
-export const STATUSES = ['present', 'half_day', 'paid_leave', 'absent'];
-export const SHORT = { present: 'P', half_day: 'H', paid_leave: 'L', absent: 'A' };
+export const STATUSES = ['present', 'wfh', 'half_day', 'paid_leave', 'absent'];
+export const SHORT = { present: 'P', wfh: 'W', half_day: 'H', paid_leave: 'L', absent: 'A' };
 
 export function Brushes({ value, onChange }) {
   return (

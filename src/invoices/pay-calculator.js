@@ -5,6 +5,7 @@ const D = Decimal.clone({ precision: 40, rounding: Decimal.ROUND_HALF_UP });
 
 export const ATTENDANCE_FACTORS = {
   present: 1,
+  wfh: 1,
   paid_leave: 1,
   half_day: 0.5,
   absent: 0,
@@ -85,7 +86,7 @@ export function calculatePay(input) {
     return row;
   };
 
-  const summary = { present: 0, halfDay: 0, paidLeave: 0, absent: 0, unmarked: 0, notAssigned: 0 };
+  const summary = { present: 0, wfh: 0, halfDay: 0, paidLeave: 0, absent: 0, unmarked: 0, notAssigned: 0 };
   const unmarkedDates = [];
   const segments = new Map(); // effective_month → segment
   const currencies = new Set();
@@ -104,7 +105,7 @@ export function calculatePay(input) {
       summary.unmarked += 1;
       unmarkedDates.push(d);
     } else {
-      summary[{ present: 'present', half_day: 'halfDay', paid_leave: 'paidLeave', absent: 'absent' }[status]] += 1;
+      summary[{ present: 'present', wfh: 'wfh', half_day: 'halfDay', paid_leave: 'paidLeave', absent: 'absent' }[status]] += 1;
     }
 
     const salary = salaryOn(d);

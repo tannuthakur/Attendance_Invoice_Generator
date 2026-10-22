@@ -4,9 +4,9 @@ import { api, fetchAllPages } from '../api';
 import { Empty, ErrorAlert, Loading, PageHeader, useAsync, useToast } from '../components/ui';
 import { ProjectSelect, loadProjects } from '../components/pickers';
 import { Brushes, SHORT, STATUSES } from '../components/AttendanceCalendar';
-import { STATUS_LABELS, WEEKDAYS, billingPeriod, currentMonth, dayOfWeek, eachDay, formatDate, formatMonth, shiftMonth } from '../format';
+import { STATUS_LABELS, WEEKDAYS, billingPeriod, currentMonth, dayOfWeek, eachDay, formatDate, formatMonth, shiftMonth, todayIso } from '../format';
 
-const FACTOR = { present: 1, paid_leave: 1, half_day: 0.5, absent: 0 };
+const FACTOR = { present: 1, wfh: 1, paid_leave: 1, half_day: 0.5, absent: 0 };
 const key = (employeeId, date) => `${employeeId}|${date}`;
 
 export function AttendancePage() {
@@ -20,6 +20,8 @@ export function AttendancePage() {
   const [saving, setSaving] = useState(false);
   const [nameFilter, setNameFilter] = useState('');
   const [onlyUnmarked, setOnlyUnmarked] = useState(false);
+  const [selected, setSelected] = useState(() => new Set());
+  const [batchDate, setBatchDate] = useState('');
 
   const setParam = (k, v) => {
     const next = new URLSearchParams(params);
@@ -55,7 +57,11 @@ export function AttendancePage() {
   }, [projectId, period.start, period.end, ready]);
 
   // Discard unsaved edits when the view changes.
-  useEffect(() => setEdits({}), [projectId, period.start, period.end]);
+  useEffect(() => {
+    setEdits({});
+    setBatchDate('');
+  }, [projectId, period.start, period.end]);
+  useEffect(() => setSelected(new Set()), [projectId]);
 
   useEffect(() => {
     const stop = () => setPainting(false);
@@ -96,8 +102,31 @@ export function AttendancePage() {
       (!onlyUnmarked || workingDays.some((d) => !statusOf(e.id, d))),
   );
 
+  // With employees ticked, date clicks and "Mark" apply to them only; otherwise to everyone shown.
+  const selectedShown = visibleEmployees.filter((e) => selected.has(e.id));
+  const targets = selectedShown.length ? selectedShown : visibleEmployees;
+  const allShownSelected = visibleEmployees.length > 0 && selectedShown.length === visibleEmployees.length;
+  const toggleSelected = (id) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  const toggleAllShown = () =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      for (const e of visibleEmployees) {
+        if (allShownSelected) next.delete(e.id);
+        else next.add(e.id);
+      }
+      return next;
+    });
+  const today = todayIso();
+  const markDate = batchDate || (today >= period.start && today <= period.end ? today : period.start);
+
   const fillRow = (emp) => paint(workingDays.filter((d) => !statusOf(emp.id, d)).map((d) => [emp.id, d]));
-  const fillColumn = (d) => paint(visibleEmployees.map((e) => [e.id, d]));
+  const fillColumn = (d) => paint(targets.map((e) => [e.id, d]));
 
   const save = async () => {
     setSaving(true);
@@ -159,8 +188,29 @@ export function AttendancePage() {
           </div>
         </div>
         <p className="muted small" style={{ margin: '10px 0 0' }}>
-          Click or drag across cells. Click a date to mark everyone shown, or “Fill” to mark a person's unmarked working days.
+          Click or drag across cells. Tick employees to mark just them, click a date to mark everyone ticked (or everyone shown), or “Fill” to mark a person's unmarked working days.
         </p>
+        {selectedShown.length > 0 && (
+          <div className="toolbar batch-bar">
+            <strong>{selectedShown.length} selected</strong>
+            <div className="actions">
+              <span className="muted small">Mark as</span>
+              <span className={`badge st-${brush}`}>{STATUS_LABELS[brush]}</span>
+              <span className="muted small">on</span>
+              <input
+                className="input"
+                type="date"
+                value={markDate}
+                min={period.start}
+                max={period.end}
+                onChange={(e) => setBatchDate(e.target.value)}
+                aria-label="Date to mark"
+              />
+              <button className="btn btn-primary btn-sm" onClick={() => fillColumn(markDate)}>Mark selected</button>
+              <button className="btn btn-sm" onClick={() => setSelected(new Set())}>Clear selection</button>
+            </div>
+          </div>
+        )}
       </div>
 
       <ErrorAlert error={error || projects.error} />
@@ -178,12 +228,23 @@ export function AttendancePage() {
               <table className="att-grid">
                 <thead>
                   <tr>
-                    <th className="name">Employee</th>
+                    <th className="name">
+                      <label className="actions" style={{ flexWrap: 'nowrap', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={allShownSelected}
+                          ref={(el) => el && (el.indeterminate = selectedShown.length > 0 && !allShownSelected)}
+                          onChange={toggleAllShown}
+                          aria-label="Select all employees shown"
+                        />
+                        Employee
+                      </label>
+                    </th>
                     {days.map((d) => (
                       <th
                         key={d}
                         className={data.holidays[d] ? 'holiday' : isOff(d) ? 'off' : ''}
-                        title={data.holidays[d] || `Mark everyone ${STATUS_LABELS[brush].toLowerCase()} on ${formatDate(d)}`}
+                        title={data.holidays[d] || `Mark ${selectedShown.length ? 'selected employees' : 'everyone shown'} ${STATUS_LABELS[brush].toLowerCase()} on ${formatDate(d)}`}
                         onClick={() => fillColumn(d)}
                       >
                         {Number(d.slice(8))}
@@ -204,6 +265,12 @@ export function AttendancePage() {
                       <tr key={emp.id}>
                         <td className="name">
                           <div className="actions" style={{ justifyContent: 'space-between', flexWrap: 'nowrap' }}>
+                            <input
+                              type="checkbox"
+                              checked={selected.has(emp.id)}
+                              onChange={() => toggleSelected(emp.id)}
+                              aria-label={`Select ${emp.fullName}`}
+                            />
                             <Link to={`/employees/${emp.id}`} title={emp.fullName} style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{emp.fullName}</Link>
                             <button className="link-btn small" onClick={() => fillRow(emp)} title="Mark unmarked working days">Fill</button>
                           </div>

@@ -79,6 +79,7 @@ export function renderInvoicePdf(invoice) {
   heading('Attendance summary');
   row('Working days in period', calc.workingDays);
   row('Present', calc.attendance.present);
+  row('Work from home', calc.attendance.wfh);
   row('Half days', calc.attendance.halfDay);
   row('Paid leave', calc.attendance.paidLeave);
   row('Absent', calc.attendance.absent);

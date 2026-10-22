@@ -188,6 +188,7 @@ export function Breakdown({ calc }) {
         <div className="card-body">
           <Row label="Working days in period">{calc.workingDays}</Row>
           <Row label="Present">{calc.attendance.present}</Row>
+          <Row label="Work from home">{calc.attendance.wfh ?? 0}</Row>
           <Row label="Half days (× 0.5)">{calc.attendance.halfDay}</Row>
           <Row label="Paid leave">{calc.attendance.paidLeave}</Row>
           <Row label="Absent">{calc.attendance.absent}</Row>

@@ -52,8 +52,8 @@ const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 // ---------------------------------------------------------------------------
 // Calculation
 // ---------------------------------------------------------------------------
-/** Days off for client billing: unpaid and paid leave both count; a half day counts 0.5. */
-const LEAVE_FACTOR = { absent: 1, paid_leave: 1, half_day: 0.5, present: 0 };
+/** Days off for client billing: unpaid and paid leave both count; a half day counts 0.5; WFH is a working day. */
+const LEAVE_FACTOR = { absent: 1, paid_leave: 1, half_day: 0.5, present: 0, wfh: 0 };
 
 /**
  * One client invoice for a project and period, with one line per employee.

@@ -65,6 +65,7 @@ export function formatMoney(amount, currency = 'USD') {
 
 export const STATUS_LABELS = {
   present: 'Present',
+  wfh: 'Work from home',
   half_day: 'Half day',
   paid_leave: 'Paid leave',
   absent: 'Absent',

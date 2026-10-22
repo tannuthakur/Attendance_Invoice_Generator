@@ -23,6 +23,8 @@
   --st-leave-bg: #e3eafc;
   --st-absent: #c93a3a;
   --st-absent-bg: #f9e1e1;
+  --st-wfh: #0f7c86;
+  --st-wfh-bg: #d9f1f2;
   --off-day: #eceef2;
   --radius: 8px;
   --shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.08);
@@ -57,6 +59,8 @@
     --st-leave-bg: #232d4a;
     --st-absent: #f07070;
     --st-absent-bg: #3a2224;
+    --st-wfh: #4cc3cc;
+    --st-wfh-bg: #183236;
     --off-day: #20242b;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
     --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
@@ -219,6 +223,7 @@ table.table { width: 100%; border-collapse: collapse; }
 .badge.red { background: var(--danger-soft); color: var(--danger); }
 .badge.blue { background: var(--accent-soft); color: var(--accent); }
 .badge.amber { background: var(--warning-soft); color: var(--warning); }
+.badge.teal { background: var(--st-wfh-bg); color: var(--st-wfh); }
 .alert { padding: 10px 14px; border-radius: 6px; border: 1px solid transparent; white-space: pre-line; }
 .alert.error { background: var(--danger-soft); color: var(--danger); }
 .alert.warning { background: var(--warning-soft); color: var(--warning); }
@@ -263,6 +268,7 @@ table.table { width: 100%; border-collapse: collapse; }
 .st-half_day { background: var(--st-half-bg); color: var(--st-half); }
 .st-paid_leave { background: var(--st-leave-bg); color: var(--st-leave); }
 .st-absent { background: var(--st-absent-bg); color: var(--st-absent); }
+.st-wfh { background: var(--st-wfh-bg); color: var(--st-wfh); }
 
 .att-grid { border-collapse: separate; border-spacing: 0; font-size: 12px; user-select: none; }
 .att-grid th, .att-grid td { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 0; text-align: center; }
@@ -276,6 +282,7 @@ table.table { width: 100%; border-collapse: collapse; }
 .att-grid td.holiday, .att-grid th.holiday { background: repeating-linear-gradient(45deg, var(--off-day), var(--off-day) 4px, transparent 4px, transparent 8px); }
 .att-grid td.dirty { box-shadow: inset 0 0 0 2px var(--warning); }
 .att-grid td.summary { padding: 0 10px; white-space: nowrap; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.batch-bar { margin: 12px 0 0; padding: 8px 12px; border-radius: 8px; background: var(--accent-soft); justify-content: space-between; }
 .att-scroll { overflow: auto; max-height: 68vh; }
 .savebar { position: sticky; bottom: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 18px; background: var(--surface); border-top: 1px solid var(--border); border-radius: 0 0 var(--radius) var(--radius); }
 

@@ -58,6 +58,7 @@ describe('calculatePay', () => {
     expect(result.currency).toBe('INR');
     expect(result.attendance).toEqual({
       present: 18,
+      wfh: 0,
       halfDay: 1,
       paidLeave: 1,
       absent: 1,
@@ -65,6 +66,22 @@ describe('calculatePay', () => {
       notAssigned: 0,
     });
     expect(result.warnings).toEqual([]);
+  });
+
+  it('pays work-from-home days like present days', () => {
+    const days = workingDaysOf(PERIOD.periodStart, PERIOD.periodEnd, HOLIDAY);
+    const result = calculatePay({
+      ...PERIOD,
+      weekendDays: [0, 6],
+      holidays: HOLIDAY,
+      assignments: FULL_ASSIGNMENT,
+      attendance: [...mark(days.slice(0, 19), 'present'), ...mark(days.slice(19), 'wfh')],
+      salaries: SALARY_60K,
+    });
+
+    expect(result.payableDays).toBe(21);
+    expect(result.grossAmount).toBe('60000.00');
+    expect(result.attendance).toMatchObject({ present: 19, wfh: 2 });
   });
 
   it('excludes weekends and holidays from working days', () => {

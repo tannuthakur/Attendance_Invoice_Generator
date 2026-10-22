@@ -3,7 +3,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export const ATTENDANCE_STATUSES = ['present', 'half_day', 'paid_leave', 'absent'];
+export const ATTENDANCE_STATUSES = ['present', 'wfh', 'half_day', 'paid_leave', 'absent'];
 
 export class MarkAttendanceDto {
   @IsUUID() employeeId;

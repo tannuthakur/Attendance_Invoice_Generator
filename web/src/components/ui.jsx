@@ -99,7 +99,7 @@ export function Empty({ children }) {
 
 const BADGE_COLORS = {
   on_role: 'green', off_role: 'red', issued: 'blue', paid: 'green', void: 'red', admin: 'blue', user: '',
-  present: 'green', half_day: 'amber', paid_leave: 'blue', absent: 'red',
+  present: 'green', wfh: 'teal', half_day: 'amber', paid_leave: 'blue', absent: 'red',
 };
 
 export function Badge({ value, children, color }) {
